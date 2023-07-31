@@ -1,11 +1,9 @@
 import { Repository } from "typeorm";
 import { AppDataSource } from "../../data-source";
 import { User } from "../../entities/users.entity";
-import { userSchemaResponse } from "../../schemas/users.schemas";
-import { hash } from "bcryptjs";
 import { AppError } from "../../errors";
 import { Contact } from "../../entities/contacts.entity";
-import { contactSchema, contactSchemaResponse } from "../../schemas/contacts.schemas";
+import { contactSchema } from "../../schemas/contacts.schemas";
 
 export const createContactService = async (contactData: any, userId: number): Promise<any> => {
 

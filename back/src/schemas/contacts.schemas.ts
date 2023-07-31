@@ -8,6 +8,6 @@ export const contactSchema = z.object({
     createdAt: z.string()
 })
 
-export const contactSchemaResponse = contactSchema.extend({
-    userId: z.number()
-})
+export const contactSchemaRequest = contactSchema.omit({ id: true, createdAt: true })
+
+export const updateContactSchemaRequest = contactSchemaRequest.partial()
