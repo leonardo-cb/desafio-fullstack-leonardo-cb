@@ -2,6 +2,7 @@ import { ReactNode, createContext, useEffect, useState } from "react";
 import { iLogin } from "../pages/login/validator";
 import { api } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { iRegister } from "../pages/register/validator";
 
 interface AuthProviderProps {
     children: ReactNode
@@ -9,6 +10,7 @@ interface AuthProviderProps {
 
 interface AuthContextValues {
     signIn: (data: iLogin) => void
+    registerNewUser: (data: iRegister) => void
     loading: boolean
 }
 
@@ -52,8 +54,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     }
 
+    const registerNewUser = async (data: iRegister) => {
+
+        try {
+            
+            await api.post("/register", data)
+
+            navigate("login")
+
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     return(
-        <AuthContext.Provider value={{signIn, loading}}>
+        <AuthContext.Provider value={{signIn, registerNewUser, loading}}>
             {children}
         </AuthContext.Provider>
     )

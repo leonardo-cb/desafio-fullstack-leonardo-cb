@@ -6,6 +6,7 @@ import { AuthContext } from "../../context/authProvider"
 import { SFormBox } from "../../components/formBox/styles"
 import { SectionForm } from "../../components/sectionForm"
 import { SectionImg } from "../../components/sectionImg"
+import { useNavigate } from "react-router-dom"
 
 export const LoginPage = () => {
 
@@ -14,6 +15,13 @@ export const LoginPage = () => {
     })
 
     const { signIn } = useContext(AuthContext)
+
+    const navigate = useNavigate()
+
+    const handleNavigate = (e: React.MouseEvent<HTMLButtonElement>): void => {
+        e.preventDefault()
+        navigate("/register")
+    }
 
     return(
         <SFormBox>
@@ -30,6 +38,8 @@ export const LoginPage = () => {
                         </div>
                         <button type="submit">Login</button>
                     </form>
+                    <small>Ainda não possuí uma conta?</small>
+                    <button onClick={handleNavigate}>Cadastre-se</button>
             </SectionForm>
             <SectionImg />
         </SFormBox>
