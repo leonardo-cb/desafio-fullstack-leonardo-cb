@@ -14,11 +14,13 @@ interface AuthContextValues {
     registerNewUser: (data: iRegister) => void
     updateUser: (data: iUpdateProfile) => void
     loading: boolean
+    deleteUser: () => void
 }
 
 export const AuthContext = createContext({} as AuthContextValues)
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+
 
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true)
@@ -37,24 +39,43 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     }, [])
 
-    const signIn = async (data: iLogin) => {
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function decodeToken(token: string): { [key: string]: any } | null {
         try {
-
-            const response = await api.post("/login", data)
-            const { token } = response.data
-    
-            api.defaults.headers.common.Authorization = `Bearer ${token}`
-
-            localStorage.setItem("fullstack:token", token)
-            setLoading(false)
-    
-            navigate("dashboard")
-
-        } catch(err){
-            console.log(err)
+          const tokenPayload = token.split(".")[1];
+          const decodedData = atob(tokenPayload);
+          return JSON.parse(decodedData);
+        } catch (error) {
+          console.log("Error decoding token:", error);
+          return null;
         }
-    }
+      }
+
+    const signIn = async (data: iLogin) => {
+        try {
+          const response = await api.post("/login", data);
+          const { token } = response.data;
+      
+          // Decodificar o token para obter o userId
+          const decodedToken = decodeToken(token);
+          if (decodedToken !== null) {
+            const userId: number | undefined = decodedToken.sub ? +decodedToken.sub : undefined;
+      
+            api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      
+            localStorage.setItem("fullstack:token", token);
+            if (userId !== undefined) {
+              localStorage.setItem("fullstack:userId", String(userId));
+            }
+            setLoading(false);
+            navigate("dashboard");
+          } else {
+            console.log("Invalid token");
+          }
+        } catch (err) {
+          console.log(err);
+        }
+    };
 
     const registerNewUser = async (data: iRegister) => {
 
@@ -73,16 +94,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         try {
 
-            await api.patch("/users", data)
+            const userId = localStorage.getItem("fullstack:userId")
+            await api.patch(`/users/${userId}`, data)
 
+        } catch (err){
+            console.log(err)
+        }
+    }
 
+    const deleteUser = async () => {
+
+        try {
+
+            const userId = localStorage.getItem("fullstack:userId")
+            await api.delete(`/users/${userId}`)
+            navigate("/")
         } catch (err) {
             console.log(err)
         }
     }
 
     return(
-        <AuthContext.Provider value={{signIn, registerNewUser, loading, updateUser}}>
+        <AuthContext.Provider value={{signIn, registerNewUser, loading, updateUser, deleteUser}}>
             {children}
         </AuthContext.Provider>
     )

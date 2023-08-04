@@ -45,14 +45,20 @@ export const Container = styled.div`
     main {
         display: flex;
         align-items: center;
-
-        ul {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            flex-wrap: wrap;
-            gap: 40px;
-
-        }
     }
+`
+
+export const CardBox = styled.ul`
+    margin: 0 auto;
+    list-style: none;
+    margin-top: 20px;
+    padding: 40px 0 40px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-evenly;
+    gap: 20px;
+    background-color: var(--color-primary-dark);
+    max-width: 1200px;
+    flex-wrap: wrap;
+    border-radius: 20px;
 `

@@ -22,6 +22,6 @@ import { Contact } from "./contacts.entity";
     @CreateDateColumn({ type: 'date'})
     createdAt: Date | string
 
-    @OneToMany(() => Contact, (contact) => contact.user)
+    @OneToMany(() => Contact, (contact) => contact.user, { onDelete: 'CASCADE'})
     contacts: Contact[]
 }

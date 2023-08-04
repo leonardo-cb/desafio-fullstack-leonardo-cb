@@ -30,7 +30,8 @@ export const loginService = async (loginData: any): Promise<string> => {
 
     const token = jwt.sign(
         {
-            fullName: user.fullName
+            fullName: user.fullName,
+            id: user.id
         },
         process.env.SECRET_KEY!,
         {

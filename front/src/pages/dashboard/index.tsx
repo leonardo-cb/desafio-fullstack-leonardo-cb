@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from "react"
 import { api } from "../../services/api"
-import { Container } from "./styles"
+import { CardBox, Container } from "./styles"
 import { Card } from "../../components/card"
 import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { createContactSchema, iCreateContact, iUpdateProfile, updateProfileSchema } from "./validator";
 import { AuthContext } from "../../context/authProvider";
+import { Modal } from "../../components/modals";
 
 export interface Contact {
     id: number
@@ -26,22 +27,22 @@ export interface User {
 
 export const Dashboard = () => {
 
+    const [isOpenModal, setIsOpenModal] = useState<boolean>(false)
+
+    const toggleModal = () => {
+        setIsOpenModal(!isOpenModal)
+    }
+
     const [contacts, setContacts] = useState<Contact[]>([])
 
     
     useEffect(() =>{
         (async () => {
             const response = await api.get<Contact[]>("/contacts")
-            console.log(response.data)
+
             setContacts(response.data)
         })()
     }, [])
-
-    const contactsRender = () => {
-        return contacts.map((contact) => {
-            return <Card key={contact.id} contact={contact} ></Card>
-        })
-    }
 
     const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false)
 
@@ -77,19 +78,46 @@ export const Dashboard = () => {
         resolver: zodResolver(createContactSchema)
     })
 
-    const { updateUser } = useContext(AuthContext)
+    const { updateUser, deleteUser } = useContext(AuthContext)
+
+    const [selectedContactId, setSelectedContactId] = useState<number | null>(null);
+
+    const handleEditContact = (contactId: number) => {
+        setSelectedContactId(contactId)
+        setIsOpenModal(true)
+    }
+
+    const contactsRender = () => {
+        return contacts.map((contact) => {
+          return (
+            <Card
+              key={contact.id}
+              contact={contact}
+              toggleModal={toggleModal}
+              onEditContact={() => handleEditContact(contact.id)}
+            />
+          );
+        });
+      };
 
     const createContact = async (data: iCreateContact) => {
 
         try {
             const response = await api.post("/contacts", data)
-            console.log("oi", response.data)
             setContacts((previousContacts) => [...previousContacts, response.data])
         } catch (err) {
             console.log(err)
         }
 
     }
+
+    const updateContactInList = (updatedContact: Contact | null) => {
+        setContacts((previousContacts) =>
+            previousContacts.map((contact) =>
+                contact.id === updatedContact?.id ? updatedContact : contact
+            )
+        );
+    };
 
     return(
         <>
@@ -116,7 +144,7 @@ export const Dashboard = () => {
                                     <input type="password" id="password" {...registerUpdate("password")} />
                                     <label htmlFor="telephone">Telefone</label>
                                     <input type="telephone" id="telephone" {...registerUpdate("telephone")} />
-                                    <button>Atualizar</button>
+                                    <button type="submit">Atualizar</button>
                                 </motion.form>
                             </motion.div>
                             )}
@@ -161,17 +189,24 @@ export const Dashboard = () => {
                             {isOpenDelete && (
                             <motion.div layout>
                                 <p>Tem certeza que gostaria de apagar sua conta?</p>
-                                <button>Sim</button>
+                                <button onClick={deleteUser}>Sim</button>
                                 <button onClick={handleLiClickDeleteButton}>Não</button>
                             </motion.div>
                             )}
                             </motion.li>
                     </ul>
                 </header>
+                {
+                    isOpenModal && (<Modal 
+                                        contactId={selectedContactId} 
+                                        toggleModal={toggleModal}
+                                        onUpdateContact={updateContactInList}
+                                    />
+                    )}
                 <main>
-                    <ul>
+                    <CardBox>
                         {contactsRender()}
-                    </ul>
+                    </CardBox>
                 </main>
             </Container>
         </>
