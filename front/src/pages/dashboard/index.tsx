@@ -8,6 +8,8 @@ import { useForm } from "react-hook-form";
 import { createContactSchema, iCreateContact, iUpdateProfile, updateProfileSchema } from "./validator";
 import { AuthContext } from "../../context/authProvider";
 import { Modal } from "../../components/modals";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export interface Contact {
     id: number
@@ -34,15 +36,49 @@ export const Dashboard = () => {
     }
 
     const [contacts, setContacts] = useState<Contact[]>([])
+    const [user, setUser] = useState<User | null>(null)
+
+    const updateUser = async (data: iUpdateProfile) => {
+        try {
+            const userId = localStorage.getItem("fullstack:userId")
+
+            await api.patch(`/users/${userId}`, data)
+            const responseUser = await api.get(`/users/${userId}`)
+            toast.success('Usuário atualizado!')
+            setUser(responseUser.data)
+            setIsOpenUpdate(false)
+
+        } catch (err) {
+            toast.error('Algo deu errado!')
+            console.log(err)
+        }
+    };
 
     
     useEffect(() =>{
         (async () => {
-            const response = await api.get<Contact[]>("/contacts")
+            const responseContacts = await api.get<Contact[]>("/contacts")
+            
+            setContacts(responseContacts.data)
 
-            setContacts(response.data)
         })()
+
+        
     }, [])
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const userId = localStorage.getItem("fullstack:userId");
+                const responseUser = await api.get(`/users/${userId}`);
+                setUser(responseUser.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchUser();
+    }, []);
 
     const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false)
 
@@ -78,7 +114,7 @@ export const Dashboard = () => {
         resolver: zodResolver(createContactSchema)
     })
 
-    const { updateUser, deleteUser } = useContext(AuthContext)
+    const { deleteUser } = useContext(AuthContext)
 
     const [selectedContactId, setSelectedContactId] = useState<number | null>(null);
 
@@ -104,8 +140,11 @@ export const Dashboard = () => {
 
         try {
             const response = await api.post("/contacts", data)
+            toast.success('Contato criado!')
+            setIsOpenCreate(false);
             setContacts((previousContacts) => [...previousContacts, response.data])
         } catch (err) {
+            toast.error('Algo deu errado!')
             console.log(err)
         }
 
@@ -196,6 +235,13 @@ export const Dashboard = () => {
                             </motion.li>
                     </ul>
                 </header>
+                { user && (
+                            <>
+                                <h2>Bem vindo! {user.fullName}</h2>
+                                <p>Seu telefone: {user.telephone}</p>                  
+                            </>
+                )
+                }
                 {
                     isOpenModal && (<Modal 
                                         contactId={selectedContactId} 
@@ -208,6 +254,18 @@ export const Dashboard = () => {
                         {contactsRender()}
                     </CardBox>
                 </main>
+                <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+                />
             </Container>
         </>
     )

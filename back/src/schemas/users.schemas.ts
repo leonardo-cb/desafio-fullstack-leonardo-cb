@@ -11,4 +11,6 @@ export const userSchema = z.object({
 
 export const userSchemaRequest = userSchema.omit({ id: true })
 
+export const setUpdateData = userSchemaRequest.partial()
+
 export const userSchemaResponse = userSchema.omit({ password: true })

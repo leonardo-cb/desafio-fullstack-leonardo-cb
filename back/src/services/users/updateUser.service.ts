@@ -11,9 +11,15 @@ export const updateUserService = async (userData: any, userId: number): Promise<
         id: userId
     })
 
+    const updateData = {
+        fullName: userData.fullName !== "" ? userData.fullName : oldUser?.fullName,
+        password: userData.password !== "" ? userData.password : oldUser?.password,
+        telephone: userData.telephone !== "" ? userData.telephone : oldUser?.telephone
+    };
+    
     const newUser = userRepository.create({
         ...oldUser,
-        ...userData
+        ...updateData
     })
 
     await userRepository.save(newUser)

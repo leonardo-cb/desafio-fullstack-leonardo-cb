@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom"
-import { SFormBox } from "../../components/formBox/styles"
 import { SectionForm } from "../../components/sectionForm"
 import { SectionImg } from "../../components/sectionImg"
 import { iRegister, registerSchema } from "./validator"
@@ -7,6 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useContext } from "react"
 import { AuthContext } from "../../context/authProvider"
+import { FormBox } from "../../components/formBox"
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const RegisterPage = () => {
 
@@ -25,7 +27,7 @@ export const RegisterPage = () => {
     }
 
     return(
-        <SFormBox>
+        <FormBox>
         <SectionForm>
             <h2>Cadastro</h2>
                 <form onSubmit={handleSubmit(registerNewUser)}>
@@ -55,6 +57,18 @@ export const RegisterPage = () => {
                 <button onClick={handleNavigate}>Entrar</button>
         </SectionForm>
         <SectionImg />
-    </SFormBox>
+        <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+            />
+    </FormBox>
     )
 }

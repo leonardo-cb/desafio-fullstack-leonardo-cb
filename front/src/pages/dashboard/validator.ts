@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const updateProfileSchema = z.object({
-    fullName: z.string().max(60, "O nome deve ter no máximo 60 caracteres."),
-    password: z.string(),
-    telephone: z.string().max(13, "Digite apenas os números com código de país e estado.")
+    fullName: z.string().max(60, "O nome deve ter no máximo 60 caracteres.").optional(),
+    password: z.string().optional(),
+    telephone: z.string().max(13, "Digite apenas os números com código de país e estado.").optional()
 })
 
 export type iUpdateProfile = z.infer<typeof updateProfileSchema>

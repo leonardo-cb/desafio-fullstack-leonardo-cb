@@ -33,9 +33,14 @@ DATABASE_URL=postgresql://seu_usuario:senha@localhost:5432/seu_banco_de_dados
 
 Migrações do Banco de Dados
 
-Com o terminal ainda na pasta back, execute o seguinte comando para rodar as migrações do banco de dados:
+Com o terminal ainda na pasta back, execute o seguinte comando para gerar as migrações:
 
-yarn typeorm migration:run
+yarn typeorm migration:generate src/migrations -d src/data-source.ts
+
+
+Execute o seguinte comando para rodar as migrações do banco de dados:
+
+yarn typeorm migration:run -d src/data-source.ts
 
 Executando a Aplicação
 

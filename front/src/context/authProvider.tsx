@@ -3,7 +3,7 @@ import { iLogin } from "../pages/login/validator";
 import { api } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { iRegister } from "../pages/register/validator";
-import { iUpdateProfile } from "../pages/dashboard/validator";
+import { toast } from 'react-toastify';
 
 interface AuthProviderProps {
     children: ReactNode
@@ -12,7 +12,6 @@ interface AuthProviderProps {
 interface AuthContextValues {
     signIn: (data: iLogin) => void
     registerNewUser: (data: iRegister) => void
-    updateUser: (data: iUpdateProfile) => void
     loading: boolean
     deleteUser: () => void
 }
@@ -56,10 +55,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const response = await api.post("/login", data);
           const { token } = response.data;
       
-          // Decodificar o token para obter o userId
           const decodedToken = decodeToken(token);
           if (decodedToken !== null) {
             const userId: number | undefined = decodedToken.sub ? +decodedToken.sub : undefined;
+            toast.success('Mensagem de sucesso!')
       
             api.defaults.headers.common.Authorization = `Bearer ${token}`;
       
@@ -73,6 +72,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             console.log("Invalid token");
           }
         } catch (err) {
+          toast.error("Algo deu errado!")
           console.log(err);
         }
     };
@@ -82,22 +82,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
             
             await api.post("/users", data)
+            toast.success("Cadastro realizado!")
 
             navigate("")
 
-        } catch (err) {
-            console.log(err)
-        }
-    }
-
-    const updateUser = async (data: iUpdateProfile) => {
-
-        try {
-
-            const userId = localStorage.getItem("fullstack:userId")
-            await api.patch(`/users/${userId}`, data)
-
-        } catch (err){
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+            toast.error(`${err.response.data.message}`)
             console.log(err)
         }
     }
@@ -115,7 +106,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     return(
-        <AuthContext.Provider value={{signIn, registerNewUser, loading, updateUser, deleteUser}}>
+        <AuthContext.Provider value={{signIn, registerNewUser, loading, deleteUser}}>
             {children}
         </AuthContext.Provider>
     )
